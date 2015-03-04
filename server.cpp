@@ -74,22 +74,7 @@ void main() {
 
 	cout << "Time to upload file was " << (double)uend / ((double)CLOCKS_PER_SEC) << " seconds." << endl;
 
-	/*+++++++++++++++++++++
-	Next, send the file back
-	++++++++++++++++++++++*/
-
-
-	clock_t cstart, cend;
-	cstart = clock();
-	int s = send(client_socket, rbuffer, sizeof(rbuffer), NULL); //send message back to client
-	if (s == SOCKET_ERROR){
-		cout << "Error sending file back to client :(" << endl;
-	}
-	cout << "Sending file back to client..." << endl;
-
-	cend = clock() - cstart;
-
-	cout << "Time to send file back to client was " << (double)cend / ((double)CLOCKS_PER_SEC) << " seconds." << endl;
+	
 
 	shutdown(client_socket, SD_SEND);
 
