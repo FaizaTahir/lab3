@@ -107,28 +107,9 @@ void main() {
 		file.close();
 	}
 
-	/*+++++++++++++++++++++
-	Next, download file back
-	++++++++++++++++++++++*/
+	
 
-	char* wbuffer;
-	wbuffer = new char[size];		//will write message to this buffer
-
-	clock_t dstart, dend;			//timer
-	dstart = clock();
-	int k = recv(sock, wbuffer, size, NULL);	//receiving message from server
-	if (k == -1){
-		cout << "Error downloading file from server :(" << endl;
-	}
-	cout << "receiving file" << endl;
-	dend = clock() - dstart;
-
-	cout << "The file took " << (double)dend / ((double)CLOCKS_PER_SEC) << " seconds to download" << endl;
-
-	float down_br = (float)(8 * size) / ((float)dend / (double)CLOCKS_PER_SEC);
-	cout << "The upload bit rate is " << down_br << " bps" << endl;
-
-	cout << "Thank you for using my program!" << endl;
+	
 
 	shutdown(sock, SD_SEND);
 
