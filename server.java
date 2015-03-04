@@ -1,83 +1,53 @@
-package clientserver2;
+package serverClient;
 
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
- 
-public class server extends Thread {
-    public static final int PORT = 55555;
-    public static final int BUFFER_SIZE = 100;
- 
-    @Override
-    public void run() {
-        try {
-            ServerSocket serverSocket = new ServerSocket(PORT);
- 
-            while (true) {
-                Socket s = serverSocket.accept();
-                saveFile(s);
+import java.io.*;
+import java.net.*;
+
+class Server {
+
+	private final static String fileOutput = "D:\\bla1.txt";
+	
+    public static void main(String args[]) {
+
+        while (true) {
+            ServerSocket welcomeSocket = null;
+            Socket connectionSocket = null;
+            byte[] aByte = new byte[1];
+            int bytesRead;
+            InputStream is = null;
+
+            try {
+                welcomeSocket = new ServerSocket(5555);
+                connectionSocket = welcomeSocket.accept();
+                is = connectionSocket.getInputStream();
+            } catch (IOException ex) {
+                // Do exception handling
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            if (is != null) {
+            	 FileOutputStream fos = null;
+                 BufferedOutputStream bos = null;
+                 try {
+                     fos = new FileOutputStream( fileOutput );
+                     bos = new BufferedOutputStream(fos);
+                     bytesRead = is.read(aByte, 0, aByte.length);
+
+                     do {
+                             baos.write(aByte);
+                             bytesRead = is.read(aByte);
+                     } while (bytesRead != -1);
+
+                     bos.write(baos.toByteArray());
+                     System.out.printf("File recieved");
+                     bos.flush();
+                     bos.close();
+                     connectionSocket.close();
+                 } catch (IOException ex) {
+                     // Do exception handling
+                 }
+            
+            }
         }
     }
- 
-    private void saveFile(Socket socket) throws Exception {
-        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-        
-        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-        FileOutputStream fos = null;
-        byte [] buffer = new byte[BUFFER_SIZE];
- 
-        // 1. Read file name.
-        Object o = ois.readObject();
- 
-        if (o instanceof String) {
-            fos = new FileOutputStream(o.toString());
-        } else {
-            throwException("Something is wrong");
-        }
- 
-        // 2. Read file to the end.
-        Integer bytesRead = 0;
- 
-        do {
-            o = ois.readObject();
- 
-            if (!(o instanceof Integer)) {
-                throwException("Something is wrong");
-            }
- 
-            bytesRead = (Integer)o;
- 
-            o = ois.readObject();
- 
-            if (!(o instanceof byte[])) {
-                throwException("Something is wrong");
-            }
- 
-            buffer = (byte[])o;
- 
-            // 3. Write data to output file.
-            fos.write(buffer, 0, bytesRead);
-           
-        } while (bytesRead == BUFFER_SIZE);
-         
-        System.out.println("File transfer success");
-         
-        fos.close();
- 
-        ois.close();
-        oos.close();
-    }
- 
-    public static void throwException(String message) throws Exception {
-        throw new Exception(message);
-    }
- 
-    public static void main(String[] args) {
-        new server().start();
-    }
-}  
+}
