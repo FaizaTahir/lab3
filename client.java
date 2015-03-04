@@ -1,47 +1,54 @@
-package clientserver2;
+package serverClient;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.Arrays;
-import java.lang.*;
-import java.util.Scanner;
- 
- 
-public class client {
-    public static void main(String[] args) throws Exception {
-        String fileName = null;
- 
-       try {
-            fileName = args[0];
-        } catch (Exception e) {
-        System.out.println("Enter the name of the file :");
-        Scanner scanner = new Scanner(System.in);
-        String file_name = scanner.nextLine();
-          
-        File file = new File(file_name);
-        Socket socket = new Socket("localhost", 55555);
-        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
- 
-        oos.writeObject(file.getName());
- 
-        FileInputStream fis = new FileInputStream(file);
-        byte [] buffer = new byte[server.BUFFER_SIZE];
-        Integer bytesRead = 0;
- 
-        while ((bytesRead = fis.read(buffer)) > 0) {
-            oos.writeObject(bytesRead);
-            oos.writeObject(Arrays.copyOf(buffer, buffer.length));
+
+import java.io.*;
+import java.net.*;
+
+class client {
+
+    private final static String serverIP = "127.0.0.1";
+    private final static int serverPort = 5556;
+    private final static String fileToSend = "D:\\bla.txt";
+    public static void main(String args[]) {
+  
+        BufferedOutputStream outToServer = null;
+        Socket clientSocket = null;
+        
+
+        try {
+            clientSocket = new Socket( serverIP , serverPort );
+       
+            outToServer = new BufferedOutputStream(clientSocket.getOutputStream());
+        } catch (IOException ex) {
+            // Do exception handling
         }
- 
-        oos.close();
-        ois.close();
-        System.exit(0);    
+
+        if (outToServer != null) {
+        	File myFile = new File( fileToSend );
+            byte[] mybytearray = new byte[(int) myFile.length()];
+
+            FileInputStream fis = null;
+
+            try {
+                fis = new FileInputStream(myFile);
+            } catch (FileNotFoundException ex) {
+                // Do exception handling
+            }
+            BufferedInputStream bis = new BufferedInputStream(fis);
+
+            try {
+                bis.read(mybytearray, 0, mybytearray.length);
+                outToServer.write(mybytearray, 0, mybytearray.length);
+                System.out.printf("File sent");
+                outToServer.flush();
+                outToServer.close();
+                clientSocket.close();
+
+                // File sent, exit the main method
+                return;
+            } catch (IOException ex) {
+                // Do exception handling
+            }
+        }
+    }
 }
- 
-}
- 
-}  
